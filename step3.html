@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nove | Get Your Key</title>
+    <title>Nove | Your Key</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
@@ -15,18 +15,15 @@
         h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#FFF,#A855F7,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
         .badge{display:inline-block;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:100px;padding:6px 16px;font-size:0.7rem;color:#10B981;margin-bottom:32px;}
         h2{font-size:1.5rem;color:white;margin-bottom:16px;}
-        p{color:#9A9AA9;font-size:0.9rem;line-height:1.6;margin-bottom:32px;}
-        .btn{width:100%;padding:16px;border-radius:24px;font-weight:600;font-size:0.9rem;border:none;cursor:pointer;background:linear-gradient(135deg,#10B981,#059669);color:white;transition:all 0.2s;margin-bottom:16px;}
+        .key-box{background:rgba(0,0,0,0.4);border-radius:24px;padding:20px;border:1px solid rgba(139,92,246,0.3);margin:24px 0;}
+        .key-value{font-family:monospace;font-size:1.2rem;font-weight:700;background:rgba(0,0,0,0.5);padding:14px;border-radius:16px;color:#A855F7;word-break:break-all;letter-spacing:1px;}
+        .btn{width:100%;padding:16px;border-radius:24px;font-weight:600;font-size:0.9rem;border:none;cursor:pointer;background:linear-gradient(135deg,#10B981,#059669);color:white;transition:all 0.2s;margin-top:16px;}
         .btn:hover{transform:translateY(-2px);}
-        .key-box{background:rgba(0,0,0,0.4);border-radius:24px;padding:20px;border:1px solid rgba(16,185,129,0.3);margin-top:24px;}
-        .key-value{font-family:monospace;font-size:1rem;font-weight:700;background:rgba(0,0,0,0.5);padding:14px;border-radius:16px;color:#10B981;word-break:break-all;margin:12px 0;}
-        .copy-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;margin-top:8px;}
-        .copy-btn:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px);}
+        .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;margin-right:10px;vertical-align:middle;}
+        @keyframes spin{to{transform:rotate(360deg);}}
         .status{font-size:0.75rem;color:#6B6A7A;margin-top:16px;}
         .footer{margin-top:24px;font-size:0.7rem;color:#4A4A5A;text-align:center;}
         .hidden{display:none;}
-        .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;margin-right:10px;vertical-align:middle;}
-        @keyframes spin{to{transform:rotate(360deg);}}
     </style>
 </head>
 <body>
@@ -37,62 +34,62 @@
         <h1>NOVE</h1>
         <div class="badge">✓ VERIFIED</div>
         <h2>Your Key Is Ready</h2>
-        <p>You have successfully completed all verifications. Generate your unique key below.</p>
-        <button class="btn" id="generateBtn">Generate Key</button>
-        <div class="key-box hidden" id="keyBox">
-            <div class="key-value" id="keyValue"></div>
-            <button class="btn copy-btn" id="copyBtn">Copy to Clipboard</button>
+        
+        <div class="key-box">
+            <div class="key-value" id="keyValue">Loading...</div>
+            <button class="btn" id="copyBtn">📋 Copy to Clipboard</button>
         </div>
         <div class="status" id="statusMsg"></div>
-        <div class="footer">© 2024 Nove Key System • Keys valid for 24 hours</div>
+        <div class="footer">© 2024 Nove Key System • Key valid for 24 hours</div>
     </div>
 </div>
 <script>
-    const BACKEND_URL = "http://localhost:3000";
+    // ========== PASTEBIN RAW LINKIN (KEY LISTESI) ==========
+    const PASTEBIN_URL = "https://pastebin.com/raw/PASTE_RAW_LINKINI_BURAYA_YAZ";
     
-    const generateBtn = document.getElementById('generateBtn');
-    const keyBox = document.getElementById('keyBox');
-    const keyValue = document.getElementById('keyValue');
-    const copyBtn = document.getElementById('copyBtn');
-    const statusMsgDiv = document.getElementById('statusMsg');
-    
-    generateBtn.addEventListener('click', async () => {
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<span class="loader"></span> Generating...';
-        statusMsgDiv.textContent = 'Connecting to secure server...';
-        
+    async function getKeyFromPastebin() {
         try {
-            const response = await fetch(`${BACKEND_URL}/generate-key`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await response.json();
+            const response = await fetch(PASTEBIN_URL);
+            const data = await response.text();
             
-            if (data.success) {
-                keyValue.textContent = data.key;
-                keyBox.classList.remove('hidden');
-                statusMsgDiv.innerHTML = '✅ Key generated! Valid for 24 hours.';
-                generateBtn.innerHTML = '✓ Key Ready';
-                generateBtn.disabled = true;
-            } else {
-                statusMsgDiv.textContent = '❌ ' + data.message;
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = 'Generate Key';
+            // Key'leri satır satır al
+            const keys = data.split('\n').filter(k => k.trim().length > 10);
+            
+            if (keys.length === 0) {
+                document.getElementById('keyValue').textContent = "NO KEYS AVAILABLE";
+                document.getElementById('statusMsg').innerHTML = "❌ Key listesi bos! Yoneticiye ulasin.";
+                return;
             }
-        } catch (err) {
-            statusMsgDiv.textContent = '❌ Server connection failed. Make sure backend is running.';
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = 'Generate Key';
+            
+            // İlk key'i al (ve kullanıldı olarak işaretlemek için)
+            const firstKey = keys[0].trim();
+            document.getElementById('keyValue').textContent = firstKey;
+            document.getElementById('statusMsg').innerHTML = "✅ Key alindi! Scripte yapistir.";
+            
+            // KULLANILAN KEY'İ PASTEBİN'DEN KALDIRMAK İÇİN:
+            // Maalesef Pastebin API'si olmadan yapamayız.
+            // O yüzden aynı key birden fazla kişi alabilir.
+            // Çözüm: Her kullanıcıya farklı key vermek için backend şart.
+            
+        } catch (error) {
+            document.getElementById('keyValue').textContent = "ERROR";
+            document.getElementById('statusMsg').innerHTML = "❌ Baglanti hatasi! Tekrar dene.";
         }
-    });
+    }
     
-    copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(keyValue.textContent);
-        copyBtn.innerHTML = '✓ Copied!';
+    // Copy butonu
+    document.getElementById('copyBtn').addEventListener('click', () => {
+        const keyText = document.getElementById('keyValue').textContent;
+        navigator.clipboard.writeText(keyText);
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = "✓ COPIED!";
         setTimeout(() => {
-            copyBtn.innerHTML = 'Copy to Clipboard';
+            btn.innerHTML = "📋 Copy to Clipboard";
         }, 2000);
     });
+    
+    // Sayfa yüklenince key'i al
+    getKeyFromPastebin();
 </script>
 </body>
 </html>
